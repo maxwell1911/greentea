@@ -1,3 +1,19 @@
+####################
+### Tor checking
+####################
+check.torproject.org
+####################
+
+####################
+##### FQDN
+####################
+### Social
+vk.com
+kinopoisk.ru
+
+### Custom
+#2ip.ru
+
 ### Torrents
 #rutracker.org
 #rutor.info
@@ -19,30 +35,23 @@
 #seasonvar.ru
 
 ### Books
-lib.rus.ec
-flibusta.is
-flibs.me
-flisland.net
-flibusta.site
+#lib.rus.ec
+#flibusta.is
+#flibs.me
+#flisland.net
+#flibusta.site
 
-### social
-vk.com
-kinopoisk.ru
-
-
-
-### Other
-
-
-
-### Tor checking
-check.torproject.org
-
-### IP example
+####################
+### IP
+####################
 #195.82.146.214
 
-### CIDR example
+####################
+### CIDR
+####################
 #103.21.244.0/22
 
-### range example
+####################
+### Range
+####################
 #100.100.100.200-100.100.100.210
