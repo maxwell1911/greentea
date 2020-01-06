@@ -1,0 +1,259 @@
+https://m.habr.com/en/post/428992/
+##########################################################################
+
+*) mkdir -p /etc/storage/unblock
+
+
+*) Список доменов (и не только) для обхода блокировки (unblock.txt)
+*Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
+https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock.txt
+
+
+1) Инициализация ipset, создание множества IP-адресов unblock (start_script.sh)
+mcedit /etc/storage/start_script.sh
+*add
+### TOR. Example - load ipset modules
+modprobe ip_set
+modprobe ip_set_hash_ip
+modprobe ip_set_hash_net
+modprobe ip_set_bitmap_ip
+modprobe ip_set_list_set
+modprobe xt_set
+
+### TOR. creating of unblock array
+ipset create unblock hash:net
+
+
+###При желании вы можете отредактировать файл start_script.sh через веб-интерфейс маршрутизатора — «Дополнительно» > «Персонализация» > «Скрипты» > «Выполнить перед инициализацией маршрутизатора». После редактирования нажмите «Применить».
+
+
+2) Настройка Tor
+cat /dev/null > /etc/storage/tor/torrc
+mcedit /etc/storage/tor/torrc
+
+## See https://www.torproject.org/docs/tor-manual.html,
+## for more options you can use in this file.
+#User admin
+User maxwell
+#PidFile /opt/var/run/tor.pid
+PidFile /var/run/tor.pid
+#ExcludeExitNodes {RU}, {UA}, {BY}, {KZ}, {MD}, {AZ}, {AM}, {GE}, {LY}, {LT}, {TM}, {UZ}, {EE}
+ExcludeExitNodes {RU}, {UA}, {AM}, {KG}, {BY}
+StrictNodes 1
+#TransPort 192.168.1.1:9040 IsolateClientAddr IsolateClientProtocol IsolateDestAddr IsolateDestPort
+TransPort 192.168.1.1:9040
+#TransPort 127.0.0.1:9040
+#DNSPort 127.0.0.1:9053 #onion
+#SocksPort 127.0.0.1:9050 #onion
+#SocksPort 192.168.1.1:9050 #onion
+ExitRelay 0
+ExitPolicy reject *:*
+ExitPolicy reject6 *:*
+#VirtualAddrNetworkIPv4 172.16.0.0/12 #onion
+#VirtualAddrNetwork 10.254.0.0/16 #onion
+#AutomapHostsOnResolve 1 #onion
+#Log notice syslog
+#DataDirectory /opt/var/lib/tor
+DataDirectory /tmp/tor
+### /opt path
+#GeoIPFile /opt/share/tor/geoip
+#GeoIPFile /usr/share/tor/geoip
+#GeoIPFile /tmp/torgeoip/geoip
+#GeoIPv6File /opt/share/tor/geoip6
+#GeoIPv6File /usr/share/tor/geoip6
+#GeoIPv6File /tmp/torgeoip/geoip6
+
+
+3) Дополнительный обход фильтрации DNS-запросов провайдером: 
+#mcedit *dnscrypt-proxy.toml
+###Отредактировать через веб-интерфейс маршрутизатора — "Администрирование"-->"Сервисы". Вкл "Сервис DNSCrypt proxy?". После редактирования нажмите «Применить».:
+resolver: cisco
+local_ip_address: 127.0.0.1 (*)
+local_port: 9153
+redirect ALL DNS queries in DNSCrypt: No(*)
+Add. options: -e 4096 -S -m 0
+
+
+4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
+mcedit /etc/storage/unblock/unblock_ipset.sh
+
+##Beginning of script: unblock_ipset.sh
+#!/bin/sh
+
+#until ADDRS=$(dig +short google.com @localhost -p 9153) && [ -n "$ADDRS" ] > /dev/null 2>&1; do sleep 5; done
+until ADDRS=$(nslookup google.com localhost:9153 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -v '127.0.0.1') && [ -n "$ADDRS" ] > /dev/null 2>&1; do sleep 5; done
+#
+while read line || [ -n "$line" ]; do
+#
+  [ -z "$line" ] && continue
+  [ "${line:0:1}" = "#" ] && continue
+#
+  addr=$(echo $line | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
+  if [ ! -z "$addr" ]; then
+    ipset -exist add unblock $addr
+    continue
+  fi
+#
+  cidr=$(echo $line | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/[0-9]{1,2}')
+  if [ ! -z "$cidr" ]; then
+    ipset -exist add unblock $cidr
+    continue
+  fi
+#    
+  range=$(echo $line | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}-[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}')
+  if [ ! -z "$range" ]; then
+    ipset -exist add unblock $range
+    continue
+  fi
+#  
+  #dig +short $line @localhost -p 9153 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | awk '{system("ipset -exist add unblock "$1)}'
+  nslookup $line localhost:9153 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | grep -v '127.0.0.1' | awk '{system("ipset -exist add unblock "$1)}'
+#
+done < /etc/storage/unblock/unblock.txt
+##END of script: unblock_ipset.sh
+chmod +x /etc/storage/unblock/unblock_ipset.sh
+
+
+5) Скрипт для формирования дополнительного конфигурационного файла dnsmasq из заданного списка доменов (unblock_dnsmasq.sh)
+mcedit /etc/storage/unblock/unblock_dnsmasq.sh
+
+##Beginning of script: unblock_dnsmasq.sh
+#!/bin/sh
+
+cat /dev/null > /etc/storage/unblock/unblock.dnsmasq
+while read line || [ -n "$line" ]; do
+  [ -z "$line" ] && continue
+  [ "${line:0:1}" = "#" ] && continue
+  #
+  echo $line | grep -Eq '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' && continue
+  #
+  echo "ipset=/$line/unblock" >> /etc/storage/unblock/unblock.dnsmasq
+  echo "server=/$line/127.0.0.1#9153" >> /etc/storage/unblock/unblock.dnsmasq
+done < /etc/storage/unblock/unblock.txt
+##END of script: unblock_dnsmasq.sh
+chmod +x /etc/storage/unblock/unblock_dnsmasq.sh
+/etc/storage/unblock/unblock_dnsmasq.sh
+cat /etc/storage/unblock/unblock.dnsmasq
+
+
+6) Скрипт ручного принудительного обновления системы после редактирования списка доменов (unblock_update.sh)
+mcedit /etc/storage/unblock/unblock_update.sh
+
+##Beginning of script: unblock_update.sh
+#!/bin/sh
+
+ipset flush unblock
+#
+/etc/storage/unblock/unblock_dnsmasq.sh
+restart_dhcpd
+sleep 3
+/etc/storage/unblock/unblock_ipset.sh &
+##END of script: unblock_update.sh
+chmod +x /etc/storage/unblock/unblock_update.sh
+
+
+7) Скрипт автоматического заполнения множества unblock при загрузке маршрутизатора (S99unblock)
+#mcedit /etc/storage/unblock/init.d/S99unblock
+
+##Beginning of script: S99unblock
+#!/bin/sh
+
+[ "$1" != "start" ] && exit 0
+/etc/storage/unblock/unblock_ipset.sh &
+##END of script: S99unblock
+chmod +x /etc/storage/unblock/init.d/S99unblock
+
+
+8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
+*Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
+
+mcedit /etc/storage/unblock/unblock.sh
+
+##Beginning of script: unblock.sh
+#!/bin/sh
+
+#unblock_Setup_Start_Update
+echo Resolve provider-DNS (inbuild dnscrypt-proxy is enabled). copy previously created nameservers
+cat /dev/null > /etc/storage/unblock/resolv.dnsmasq
+while read line || [ -n "$line" ]; do
+  [ -z "$line" ] && continue
+  [ "${line:0:1}" = "#" ] && continue
+  #
+  varIP=$(echo $line | awk '{print $2}')
+  echo $varIP | grep -Eq '127.0.0.1' && continue
+  echo "server=$varIP" >> /etc/storage/unblock/resolv.dnsmasq
+done < /etc/resolv.conf
+
+echo Download List
+wget -q -O /etc/storage/unblock/unblock.txt https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock.txt
+
+echo Clean ipset before update
+ipset flush unblock
+
+echo Generating dnsmasq-unblock-conf
+cat /dev/null > /etc/storage/unblock/unblock.dnsmasq
+while read line || [ -n "$line" ]; do
+  [ -z "$line" ] && continue
+  [ "${line:0:1}" = "#" ] && continue
+  #
+  echo $line | grep -Eq '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' && continue
+  #
+  echo "ipset=/$line/unblock" >> /etc/storage/unblock/unblock.dnsmasq
+  echo "server=/$line/127.0.0.1#9153" >> /etc/storage/unblock/unblock.dnsmasq
+done < /etc/storage/unblock/unblock.txt
+
+echo Download scripts
+echo downloading unblock_ipset.sh
+wget -q -O /etc/storage/unblock/unblock_ipset.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_ipset.sh
+chmod +x /etc/storage/unblock/unblock_ipset.sh
+
+echo setting-updating ipset
+restart_dhcpd
+sleep 3
+/etc/storage/unblock/unblock_ipset.sh &
+##END of script: unblock.sh
+chmod +x /etc/storage/unblock/unblock.sh
+/etc/storage/unblock/unblock.sh
+
+### проверяем содержимое conf-файлов: 
+cat /etc/storage/unblock/resolv.dnsmasq
+cat /etc/storage/unblock/unblock.txt
+cat /etc/storage/unblock/unblock.dnsmasq
+#cat /etc/storage/unblock/unblock.ips
+ipset list unblock
+###
+
+
+9) Перенаправление пакетов с адресатами из unblock в Tor (post_iptables_script.sh)
+mcedit /etc/storage/post_iptables_script.sh
+*add
+
+### TOR
+iptables -t nat -I PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-ports 9040
+#iptables -t nat -A PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-port 9141
+# Redirect DNS
+iptables -t nat -I PREROUTING -i br0 -p udp --dport 53 -j DNAT --to 192.168.1.1
+iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to 192.168.1.1
+
+*При желании вы можете отредактировать файл post_iptables_script.sh через веб-интерфейс маршрутизатора — «Дополнительно» > «Персонализация» > «Скрипты» > «Выполнить после перезапуска правил брандмауэра». После редактирования нажмите «Применить».
+
+
+10) Подключение дополнительного конфигурационного файла к dnsmasq
+mcedit /etc/storage/dnsmasq/dnsmasq.conf
+*add
+
+### TOR
+#If dnscrypt-proxy is enabled
+conf-file=/etc/storage/unblock/resolv.dnsmasq
+#
+conf-file=/etc/storage/unblock/unblock.dnsmasq
+server=8.8.8.8
+
+
+11) Добавление задачи в cron для периодического обновления содержимого множества unblock. 
+00 06 * * * maxwell /etc/storage/unblock/unblock_ipset.sh
+
+
+12) Перезагрузка маршрутизатора
+reboot
+
