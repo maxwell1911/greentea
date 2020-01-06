@@ -10,9 +10,10 @@ smth useful: 1 - https://github.com/blackcofee/rublock-tor/wiki/tor_ua | 2 - htt
 https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock.txt
 
 
-1) Инициализация ipset, создание множества IP-адресов unblock (start_script.sh)
++1) Инициализация ipset, создание множества IP-адресов unblock (start_script.sh)
 mcedit /etc/storage/start_script.sh
 *add
+
 ### TOR. Example - load ipset modules
 modprobe ip_set
 modprobe ip_set_hash_ip
@@ -28,7 +29,7 @@ ipset create unblock hash:net
 ###При желании вы можете отредактировать файл start_script.sh через веб-интерфейс маршрутизатора — «Дополнительно» > «Персонализация» > «Скрипты» > «Выполнить перед инициализацией маршрутизатора». После редактирования нажмите «Применить».
 
 
-2) Настройка Tor
++2) Настройка Tor
 cat /dev/null > /etc/storage/tor/torrc
 mcedit /etc/storage/tor/torrc
 
@@ -65,7 +66,7 @@ DataDirectory /tmp/tor
 #GeoIPv6File /tmp/torgeoip/geoip6
 
 
-3) Дополнительный обход фильтрации DNS-запросов провайдером: 
++3) Дополнительный обход фильтрации DNS-запросов провайдером: 
 #mcedit *dnscrypt-proxy.toml
 ###Отредактировать через веб-интерфейс маршрутизатора — "Администрирование"-->"Сервисы". Вкл "Сервис DNSCrypt proxy?". После редактирования нажмите «Применить».:
 resolver: cisco
@@ -75,7 +76,7 @@ redirect ALL DNS queries in DNSCrypt: No(*)
 Add. options: -e 4096 -S -m 0
 
 
-4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
++4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
 mcedit /etc/storage/unblock/unblock_ipset.sh
 
 ##Beginning of script: unblock_ipset.sh
@@ -115,7 +116,7 @@ done < /etc/storage/unblock/unblock.txt
 chmod +x /etc/storage/unblock/unblock_ipset.sh
 
 
-5) Скрипт для формирования дополнительного конфигурационного файла dnsmasq из заданного списка доменов (unblock_dnsmasq.sh)
+-5) Скрипт для формирования дополнительного конфигурационного файла dnsmasq из заданного списка доменов (unblock_dnsmasq.sh)
 mcedit /etc/storage/unblock/unblock_dnsmasq.sh
 
 ##Beginning of script: unblock_dnsmasq.sh
@@ -137,7 +138,7 @@ chmod +x /etc/storage/unblock/unblock_dnsmasq.sh
 cat /etc/storage/unblock/unblock.dnsmasq
 
 
-6) Скрипт ручного принудительного обновления системы после редактирования списка доменов (unblock_update.sh)
+-6) Скрипт ручного принудительного обновления системы после редактирования списка доменов (unblock_update.sh)
 mcedit /etc/storage/unblock/unblock_update.sh
 
 ##Beginning of script: unblock_update.sh
@@ -153,7 +154,7 @@ sleep 3
 chmod +x /etc/storage/unblock/unblock_update.sh
 
 
-7) Скрипт автоматического заполнения множества unblock при загрузке маршрутизатора (S99unblock)
++7) Скрипт автоматического заполнения множества unblock при загрузке маршрутизатора (S99unblock)
 #mcedit /etc/storage/unblock/init.d/S99unblock
 
 ##Beginning of script: S99unblock
@@ -163,9 +164,15 @@ chmod +x /etc/storage/unblock/unblock_update.sh
 /etc/storage/unblock/unblock_ipset.sh &
 ##END of script: S99unblock
 chmod +x /etc/storage/unblock/init.d/S99unblock
+####################
+mcedit /etc/storage/start_script.sh
+*add
+
+### TOR. Re-resolve unblock-list sites
+/etc/storage/unblock/unblock_ipset.sh &
 
 
-8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
++++8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
 *Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
 
 mcedit /etc/storage/unblock/unblock.sh
@@ -225,7 +232,7 @@ ipset list unblock
 ###
 
 
-9) Перенаправление пакетов с адресатами из unblock в Tor (post_iptables_script.sh)
++9) Перенаправление пакетов с адресатами из unblock в Tor (post_iptables_script.sh)
 mcedit /etc/storage/post_iptables_script.sh
 *add
 
@@ -239,7 +246,7 @@ iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to 192.168.1.1
 *При желании вы можете отредактировать файл post_iptables_script.sh через веб-интерфейс маршрутизатора — «Дополнительно» > «Персонализация» > «Скрипты» > «Выполнить после перезапуска правил брандмауэра». После редактирования нажмите «Применить».
 
 
-10) Подключение дополнительного конфигурационного файла к dnsmasq
++10) Подключение дополнительного конфигурационного файла к dnsmasq
 mcedit /etc/storage/dnsmasq/dnsmasq.conf
 *add
 
@@ -251,10 +258,9 @@ conf-file=/etc/storage/unblock/unblock.dnsmasq
 server=8.8.8.8
 
 
-11) Добавление задачи в cron для периодического обновления содержимого множества unblock. 
++11) Добавление задачи в cron для периодического обновления содержимого множества unblock. 
 00 06 * * * maxwell /etc/storage/unblock/unblock_ipset.sh
 
 
-12) Перезагрузка маршрутизатора
++12) Перезагрузка маршрутизатора
 reboot
-
