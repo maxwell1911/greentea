@@ -264,3 +264,21 @@ server=8.8.8.8
 
 +12) Перезагрузка маршрутизатора
 reboot
+
+
+-13) очистка DNS
+windows: ipconfig /flushdns
+ubuntu: sudo systemd-resolve --flush-caches
+macOs10.14Mojave: sudo killall -HUP mDNSResponder; sleep 2;
+
+firefox dns: 
+	Приватность и защита-->Куки и данные сайтов-->Удалить данные
+		Откроется новое окно, в нём нужно снять галочку "Куки и данные сайтов" 
+		и нажать кнопку "Удалить".
+
+chrome dns: 
+	chrome://net-internals/#dns
+		Clear host cache;
+		Sockets-->Flush socket pools. 
+
+
