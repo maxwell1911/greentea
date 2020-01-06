@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #unblock_Setup_Start_Update
-echo Resolve provider-DNS (inbuild dnscrypt-proxy is enabled). copy previously created nameservers
+echo Resolve provider-DNS_inbuild dnscrypt-proxy is enabled_. copy previously created nameservers
 cat /dev/null > /etc/storage/unblock/resolv.dnsmasq
 while read line || [ -n "$line" ]; do
   [ -z "$line" ] && continue
