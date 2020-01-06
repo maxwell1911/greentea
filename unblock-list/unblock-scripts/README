@@ -14,16 +14,16 @@ https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unbloc
 mcedit /etc/storage/start_script.sh
 *add
 
-### TOR. Example - load ipset modules
+### TOR. Example - load ipset modules.
 modprobe ip_set
 modprobe ip_set_hash_ip
-modprobe ip_set_hash_net
+modprobe ip_set_hash_net #main
 modprobe ip_set_bitmap_ip
 modprobe ip_set_list_set
-modprobe xt_set
+modprobe xt_set #main
 
 ### TOR. creating of unblock array
-ipset create unblock hash:net
+ipset create unblock hash:net #main
 
 
 ###При желании вы можете отредактировать файл start_script.sh через веб-интерфейс маршрутизатора — «Дополнительно» > «Персонализация» > «Скрипты» > «Выполнить перед инициализацией маршрутизатора». После редактирования нажмите «Применить».
@@ -76,7 +76,7 @@ redirect ALL DNS queries in DNSCrypt: No(*)
 Add. options: -e 4096 -S -m 0
 
 
-+4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
+-4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
 mcedit /etc/storage/unblock/unblock_ipset.sh
 
 ##Beginning of script: unblock_ipset.sh
@@ -170,7 +170,6 @@ mcedit /etc/storage/start_script.sh
 
 ### TOR. Re-resolve unblock-list sites
 /etc/storage/unblock/unblock_ipset.sh &
-# /etc/storage/unblock/unblock.sh #main script.setup-start-update
 
 
 +++8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
@@ -269,7 +268,19 @@ server=8.8.8.8
 reboot
 
 
--13) очистка DNS
++13.1) рекомендую добавить в start_script.sh небольшие комментарии-напоминания с полезными коммандами.
+mcedit /etc/storage/start_script.sh
+*add
+
+### TOR. Re-resolve unblock-list sites
+/etc/storage/unblock/unblock_ipset.sh &
+
+### comments.some scripts to remember
+# /etc/storage/unblock/unblock.sh #main script.setup-start-update
+# ipset list unblock #check unblock-ipset array
+
+
+-13.2) очистка DNS
 windows: ipconfig /flushdns
 ubuntu: sudo systemd-resolve --flush-caches
 macOs10.14Mojave: sudo killall -HUP mDNSResponder; sleep 2;
@@ -283,5 +294,4 @@ chrome dns:
 	chrome://net-internals/#dns
 		Clear host cache;
 		Sockets-->Flush socket pools. 
-
 
