@@ -170,6 +170,7 @@ mcedit /etc/storage/start_script.sh
 
 ### TOR. Re-resolve unblock-list sites
 /etc/storage/unblock/unblock_ipset.sh &
+# /etc/storage/unblock/unblock.sh #main script.setup-start-update
 
 
 +++8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
