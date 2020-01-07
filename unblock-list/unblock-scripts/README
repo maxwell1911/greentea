@@ -218,7 +218,7 @@ chmod +x /etc/storage/unblock/unblock_ipset.sh
 echo setting-updating ipset
 restart_dhcpd
 sleep 3
-/etc/storage/unblock/unblock_ipset.sh &
+/etc/storage/unblock/unblock_ipset.sh
 echo Finish.
 ##END of script: unblock.sh
 chmod +x /etc/storage/unblock/unblock.sh
