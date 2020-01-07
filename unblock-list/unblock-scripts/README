@@ -174,13 +174,38 @@ mcedit /etc/storage/start_script.sh
 
 +++8) Повторно запускать скрипт имеет смысл по мере блокировки новых ресурсов и только после добавления их в список. 
 *Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
+/etc/storage/unblock/unblock_update.sh
 
-mcedit /etc/storage/unblock/unblock.sh
-
+8.1-mcedit /etc/storage/unblock/unblock.sh
 ##Beginning of script: unblock.sh
 #!/bin/sh
 
-#unblock_Setup_Start_Update
+#unblock_Setup
+echo Download List
+wget -q -O /etc/storage/unblock/unblock.txt https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock.txt
+
+
+echo Download scripts
+echo downloading unblock_ipset.sh
+wget -q -O /etc/storage/unblock/unblock_ipset.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_ipset.sh
+chmod +x /etc/storage/unblock/unblock_ipset.sh
+
+echo downloading unblock_update.sh
+wget -q -O /etc/storage/unblock/unblock_update.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_update.sh
+chmod +x /etc/storage/unblock/unblock_update.sh
+
+
+echo Finish.
+##END of script: unblock.sh
+chmod +x /etc/storage/unblock/unblock.sh
+/etc/storage/unblock/unblock.sh
+
+8.2-#mcedit /etc/storage/unblock/unblock_update.sh
+##Beginning of script: unblock_update.sh
+#!/bin/sh
+
+#unblock_update_Start_Update
+echo Start.
 echo Resolve provider-DNS_inbuild dnscrypt-proxy is enabled_. copy previously created nameservers
 cat /dev/null > /etc/storage/unblock/resolv.dnsmasq
 while read line || [ -n "$line" ]; do
@@ -210,25 +235,22 @@ while read line || [ -n "$line" ]; do
   echo "server=/$line/127.0.0.1#9153" >> /etc/storage/unblock/unblock.dnsmasq
 done < /etc/storage/unblock/unblock.txt
 
-echo Download scripts
-echo downloading unblock_ipset.sh
-wget -q -O /etc/storage/unblock/unblock_ipset.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_ipset.sh
-chmod +x /etc/storage/unblock/unblock_ipset.sh
-
 echo setting-updating ipset
 restart_dhcpd
 sleep 3
 /etc/storage/unblock/unblock_ipset.sh
+
 echo Finish.
-##END of script: unblock.sh
-chmod +x /etc/storage/unblock/unblock.sh
-/etc/storage/unblock/unblock.sh
+##END of script: unblock_update.sh
+#chmod +x /etc/storage/unblock/unblock_update.sh
+/etc/storage/unblock/unblock_update.sh
 
 ### проверяем содержимое conf-файлов: 
 cat /etc/storage/unblock/resolv.dnsmasq
 cat /etc/storage/unblock/unblock.txt
 cat /etc/storage/unblock/unblock.dnsmasq
 #cat /etc/storage/unblock/unblock.ips
+#ipset flush unblock
 ipset list unblock
 ###
 
