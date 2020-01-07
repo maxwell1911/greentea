@@ -273,9 +273,6 @@ reboot
 mcedit /etc/storage/start_script.sh
 *add
 
-### TOR. Re-resolve unblock-list sites
-/etc/storage/unblock/unblock_ipset.sh &
-
 ### comments.some scripts to remember
 # /etc/storage/unblock/unblock.sh #main script.setup-start-update
 # ipset list unblock #check unblock-ipset array
