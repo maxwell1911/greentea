@@ -39,3 +39,4 @@ echo setting-updating ipset
 restart_dhcpd
 sleep 3
 /etc/storage/unblock/unblock_ipset.sh &
+echo Finish.
