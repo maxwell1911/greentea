@@ -1,18 +1,23 @@
 #!/bin/sh
 
-#unblock_Setup
-echo Download List
-wget -q -O /etc/storage/unblock/unblock.txt https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock.txt
+echo '
+### TOR. Example - load ipset modules.
+modprobe ip_set
+modprobe ip_set_hash_ip
+modprobe ip_set_hash_net #main
+modprobe ip_set_bitmap_ip
+modprobe ip_set_list_set
+modprobe xt_set #main
 
+### TOR. creating of unblock array
+ipset create unblock hash:net #main
 
-echo Download scripts
-echo downloading unblock_ipset.sh
-wget -q -O /etc/storage/unblock/unblock_ipset.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_ipset.sh
-chmod +x /etc/storage/unblock/unblock_ipset.sh
+### comments.some scripts to remember
+# /etc/storage/unblock/unblock.sh #main script.setup-start-update
+# /etc/storage/unblock/unblock_update.sh #main script.start-Update
+# ipset list unblock #check unblock-ipset array
 
-echo downloading unblock_update.sh
-wget -q -O /etc/storage/unblock/unblock_update.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/unblock_update.sh
-chmod +x /etc/storage/unblock/unblock_update.sh
+' >> /etc/storage/start_script.sh
 
 
 echo Finish.
