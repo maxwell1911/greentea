@@ -2,8 +2,24 @@ https://m.habr.com/en/post/428992/
 smth useful: 1 - https://github.com/blackcofee/rublock-tor/wiki/tor_ua | 2 - https://github.com/blackcofee/guides/wiki/%D0%9D%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-dnscrypt-proxy2
 ##########################################################################
 
-*) mkdir -p /etc/storage/unblock
-
+##### Do all the next 3 steps manually #####
+### create folder
+1 — mkdir -p /etc/storage/unblock
+# download the setup script
+2 — wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock.sh
+3 — chmod +x /etc/storage/unblock/setup_unblock.sh
+###########################
+#some not yet used variables#
+#user='maxwell'
+#router_ip='192.168.1.1'
+###########################
+# Features should be enabled: #
+#1# TOR
+#2# DNSCrypt-Proxy
+#3# Cron
+###########################
+# List updates manually #
+###########################
 
 *) Список доменов (и не только) для обхода блокировки (unblock.txt)
 *Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
@@ -76,7 +92,8 @@ redirect ALL DNS queries in DNSCrypt: No(*)
 Add. options: -e 4096 -S -m 0
 
 
--4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh).
+-4) Скрипт для заполнения множества unblock IP-адресами заданного списка доменов (unblock_ipset.sh). 
+#Входит в состав скрипта unblock_ipset.sh #
 mcedit /etc/storage/unblock/unblock_ipset.sh
 
 ##Beginning of script: unblock_ipset.sh
@@ -117,6 +134,7 @@ chmod +x /etc/storage/unblock/unblock_ipset.sh
 
 
 -5) Скрипт для формирования дополнительного конфигурационного файла dnsmasq из заданного списка доменов (unblock_dnsmasq.sh)
+#Входит в состав скрипта unblock_update.sh #
 mcedit /etc/storage/unblock/unblock_dnsmasq.sh
 
 ##Beginning of script: unblock_dnsmasq.sh
@@ -139,6 +157,7 @@ cat /etc/storage/unblock/unblock.dnsmasq
 
 
 -6) Скрипт ручного принудительного обновления системы после редактирования списка доменов (unblock_update.sh)
+#Входит в состав скрипта unblock_update.sh #
 mcedit /etc/storage/unblock/unblock_update.sh
 
 ##Beginning of script: unblock_update.sh
@@ -155,6 +174,7 @@ chmod +x /etc/storage/unblock/unblock_update.sh
 
 
 +7) Скрипт автоматического заполнения множества unblock при загрузке маршрутизатора (S99unblock)
+#################### эта часть устарела ####################
 #mcedit /etc/storage/unblock/init.d/S99unblock
 
 ##Beginning of script: S99unblock
@@ -164,7 +184,9 @@ chmod +x /etc/storage/unblock/unblock_update.sh
 /etc/storage/unblock/unblock_ipset.sh &
 ##END of script: S99unblock
 chmod +x /etc/storage/unblock/init.d/S99unblock
-####################
+#################### конец устаревшей части ####################
+##########################################################
+#################### использовать это ####################
 mcedit /etc/storage/start_script.sh
 *add
 
@@ -176,7 +198,8 @@ mcedit /etc/storage/start_script.sh
 *Список: https://github.com/Maximys717/greentea/tree/master/unblock-list
 /etc/storage/unblock/unblock_update.sh
 
-8.1-mcedit /etc/storage/unblock/unblock.sh
+-8.1-mcedit /etc/storage/unblock/unblock.sh
+#устарел#
 ##Beginning of script: unblock.sh
 #!/bin/sh
 
