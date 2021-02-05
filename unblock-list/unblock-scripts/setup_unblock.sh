@@ -1,14 +1,22 @@
 #!/bin/sh
 
-##### do all manually #####
+##### Do all the next 3 steps manually #####
 ### create folder
-#mkdir -p /etc/storage/unblock
+#1#mkdir -p /etc/storage/unblock
 # download the setup script
-#wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock.sh
-#chmod +x /etc/storage/unblock/setup_unblock.sh
+#2#wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock.sh
+#3#chmod +x /etc/storage/unblock/setup_unblock.sh
 ###########################
-user=maxwell
-router_ip='192.168.1.1'
+#some not yet used variables#
+#user='maxwell'
+#router_ip='192.168.1.1'
+###########################
+# Features should be enabled: #
+#1# TOR
+#2# DNSCrypt-Proxy
+#3# Cron
+###########################
+# List updates manually #
 ###########################
 
 
@@ -32,6 +40,7 @@ sleep 3
 ### 1. init ipset
 #
 echo 'init ipset'
+#
 echo '
 ### TOR. Example - load ipset modules.
 modprobe ip_set
@@ -48,8 +57,8 @@ ipset create unblock hash:net #main
 /etc/storage/unblock/unblock_ipset.sh &
 
 ### comments.some scripts to remember
-# /etc/storage/unblock/unblock.sh #main script.setup-start-update
-# /etc/storage/unblock/unblock_update.sh #main script.start-Update
+# /etc/storage/unblock/setup_unblock.sh #main script.Setup
+# /etc/storage/unblock/unblock_update.sh #main script.Update
 # ipset list unblock #check unblock-ipset array
 
 ' >> /etc/storage/start_script.sh
@@ -60,6 +69,7 @@ echo 'ipset configuring is done'
 #
 echo 'TOR configuring'
 cat /dev/null > /etc/storage/tor/torrc
+#
 echo '
 ## See https://www.torproject.org/docs/tor-manual.html,
 ## for more options you can use in this file.
@@ -111,6 +121,7 @@ echo 'Go to Administration - Services. Turn ON Service "DNSCrypt proxy". Then "A
 ### 4. Setting ipset using unblock_update.sh script
 #
 echo 'setting ipset'
+#
 /etc/storage/unblock/unblock_update.sh
 sleep 3
 echo 'ipset is set'
@@ -119,18 +130,14 @@ echo 'ipset is set'
 ### 5. iptables. redirect all unblock list sites traffic in TOR. Router`s IP: 192.168.1.1'
 #
 echo 'iptables configuring. Router`s IP: 192.168.1.1'
+#
 echo '
 ### TOR
 iptables -t nat -I PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-ports 9040
 #iptables -t nat -A PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-port 9141
 # Redirect DNS
-' >> /etc/storage/post_iptables_script.sh
-echo 'iptables -t nat -I PREROUTING -i br0 -p udp --dport 53 -j DNAT --to ' >> /etc/storage/post_iptables_script.sh
-echo $router_ip >> /etc/storage/post_iptables_script.sh
-echo '
-iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to ' >> /etc/storage/post_iptables_script.sh
-echo $router_ip >> /etc/storage/post_iptables_script.sh
-echo'
+iptables -t nat -I PREROUTING -i br0 -p udp --dport 53 -j DNAT --to 192.168.1.1
+iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to 192.168.1.1
 ' >> /etc/storage/post_iptables_script.sh
 echo 'iptables configuring is done'
 
@@ -138,6 +145,7 @@ echo 'iptables configuring is done'
 ### 6. adding additional dsnmasq file
 #
 echo 'adding additional dsnmasq'
+#
 echo '
 ### TOR
 #If dnscrypt-proxy is enabled
@@ -153,13 +161,14 @@ echo 'additional dsnmasq is added'
 ### 7. cron. uses user's name. Administration - Services. Turn ON 'Services Cron (scheduler)'. maxwell is used
 #
 echo 'adding task in crontab. User: maxwell'
+#
 echo '00 06 * * * maxwell /etc/storage/unblock/unblock_ipset.sh' >> /etc/storage/cron/crontabs/maxwell
 echo 'task is added'
 
 
 sleep 3
-echo 'Finish.'
-echo 'rebooting...'
+echo 'Finish. 
+Rebooting'
 
 
 ### 8. reboot router
