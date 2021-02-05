@@ -122,9 +122,16 @@ echo 'Go to Administration - Services. Turn ON Service "DNSCrypt proxy". Then "A
 #
 echo 'setting ipset'
 #
-/etc/storage/unblock/unblock_update.sh
-sleep 3
+/etc/storage/unblock/unblock_ipset.sh
 echo 'ipset is set'
+sleep 3
+#
+echo 'configuring 
+resolv.dnsmasq
+unblock.dnsmasq'
+/etc/storage/unblock/unblock_update.sh
+echo 'resolv-unblock.dnsmasqs is configured'
+sleep 3
 
 
 ### 5. iptables. redirect all unblock list sites traffic in TOR. Router`s IP: 192.168.1.1'
