@@ -339,3 +339,9 @@ chrome dns:
 		Clear host cache;
 		Sockets-->Flush socket pools. 
 
+
+
+
+
+Useful commands
+find / -name 'unblock*'
