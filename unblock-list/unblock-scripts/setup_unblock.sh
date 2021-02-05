@@ -1,10 +1,16 @@
 #!/bin/sh
 
+##### do all manually #####
 ### create folder
 #mkdir -p /etc/storage/unblock
 # download the setup script
 #wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock.sh
 #chmod +x /etc/storage/unblock/setup_unblock.sh
+###########################
+user=maxwell
+router_ip='192.168.1.1'
+###########################
+
 
 ### 0. Download some scripts and list
 echo 'Download List'
@@ -95,8 +101,6 @@ echo 'TOR configuring is done'
 #
 echo '3_dnscrypt-proxy should be configured manually'
 echo 'Go to Administration - Services. Turn ON Service "DNSCrypt proxy". Then "Apply".'
-#dnscrypt-proxy
-###Отредактировать через веб-интерфейс маршрутизатора — "Администрирование"-->"Сервисы". Вкл "Сервис DNSCrypt proxy?". После редактирования нажмите «Применить».:
 #resolver: cisco
 #local_ip_address: 127.0.0.1 (*)
 #local_port: 9153
@@ -104,7 +108,7 @@ echo 'Go to Administration - Services. Turn ON Service "DNSCrypt proxy". Then "A
 #Add. options: -e 4096 -S -m 0
 
 
-### 4. Setting ipset
+### 4. Setting ipset using unblock_update.sh script
 #
 echo 'setting ipset'
 /etc/storage/unblock/unblock_update.sh
@@ -112,17 +116,21 @@ sleep 3
 echo 'ipset is set'
 
 
-### 5. iptables. redirect all unblock list sites traffic in TOR
+### 5. iptables. redirect all unblock list sites traffic in TOR. Router`s IP: 192.168.1.1'
 #
-echo 'iptables configuring'
+echo 'iptables configuring. Router`s IP: 192.168.1.1'
 echo '
 ### TOR
 iptables -t nat -I PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-ports 9040
 #iptables -t nat -A PREROUTING -i br0 -p tcp -m set --match-set unblock dst -j REDIRECT --to-port 9141
 # Redirect DNS
-iptables -t nat -I PREROUTING -i br0 -p udp --dport 53 -j DNAT --to 192.168.1.1
-iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to 192.168.1.1
-
+' >> /etc/storage/post_iptables_script.sh
+echo 'iptables -t nat -I PREROUTING -i br0 -p udp --dport 53 -j DNAT --to ' >> /etc/storage/post_iptables_script.sh
+echo $router_ip >> /etc/storage/post_iptables_script.sh
+echo '
+iptables -t nat -I PREROUTING -i br0 -p tcp --dport 53 -j DNAT --to ' >> /etc/storage/post_iptables_script.sh
+echo $router_ip >> /etc/storage/post_iptables_script.sh
+echo'
 ' >> /etc/storage/post_iptables_script.sh
 echo 'iptables configuring is done'
 
@@ -139,17 +147,19 @@ conf-file=/etc/storage/unblock/unblock.dnsmasq
 server=8.8.8.8
 
 ' >> /etc/storage/dnsmasq/dnsmasq.conf
-echo 'iptables configuring is done'
+echo 'additional dsnmasq is added'
 
 
-### 7. cron. uses user's name. Administration - Services. Turn ON 'Services Cron (scheduler)'.
+### 7. cron. uses user's name. Administration - Services. Turn ON 'Services Cron (scheduler)'. maxwell is used
 #
-echo 'adding task in crontab'
+echo 'adding task in crontab. User: maxwell'
 echo '00 06 * * * maxwell /etc/storage/unblock/unblock_ipset.sh' >> /etc/storage/cron/crontabs/maxwell
-echo 'added task'
+echo 'task is added'
 
 
-echo Finish.
+sleep 3
+echo 'Finish.'
+echo 'rebooting...'
 
 
 ### 8. reboot router
