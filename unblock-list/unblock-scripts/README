@@ -8,14 +8,13 @@ smth useful: 1 - https://github.com/blackcofee/rublock-tor/wiki/tor_ua | 2 - htt
 # download the setup script
 2 — wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock.sh
 3 — chmod +x /etc/storage/unblock/setup_unblock.sh
-###########################
 #some not yet used variables#
 #user='maxwell'
 #router_ip='192.168.1.1'
 ###########################
 # Features should be enabled: #
 #1# TOR
-#2# DNSCrypt-Proxy
+#2# DNSCrypt-Proxy (need to be configured immediately) (look 3rd step)
 #3# Cron
 ###########################
 # List updates manually #
