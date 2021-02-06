@@ -57,7 +57,7 @@ ipset create unblock hash:net #main
 /etc/storage/unblock/unblock_ipset.sh &
 
 ### comments.some scripts to remember
-# /etc/storage/unblock/setup_unblock.sh #main script.Setup
+# /etc/storage/unblock/setup_unblock_denys.sh #main script.Setup
 # /etc/storage/unblock/unblock_update.sh #main script.Update
 # ipset list unblock #check unblock-ipset array
 
