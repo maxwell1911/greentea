@@ -13,7 +13,7 @@
 ###########################
 # Features should be enabled: #
 #1# TOR
-#2# DNSCrypt-Proxy
+#2# DNSCrypt-Proxy (need to be configured immediately) (look 3rd step)
 #3# Cron
 ###########################
 # List updates manually #
