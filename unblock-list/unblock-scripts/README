@@ -318,8 +318,8 @@ mcedit /etc/storage/start_script.sh
 *add
 
 ### comments.some scripts to remember
-# /etc/storage/unblock/unblock.sh #main script.setup-start-update
-# /etc/storage/unblock/unblock_update.sh #main script.start-Update
+# /etc/storage/unblock/setup_unblock.sh #main script.Setup
+# /etc/storage/unblock/unblock_update.sh #main script.Update
 # ipset list unblock #check unblock-ipset array
 
 
