@@ -5,7 +5,7 @@
 #1#mkdir -p /etc/storage/unblock
 # download the setup script
 #2#wget -q -O /etc/storage/unblock/setup_unblock.sh https://raw.githubusercontent.com/Maximys717/greentea/master/unblock-list/unblock-scripts/setup_unblock_nastia.sh
-#3#chmod +x /etc/storage/unblock/setup_unblock_nastia.sh
+#3#chmod +x /etc/storage/unblock/setup_unblock.sh
 ###########################
 #some not yet used variables#
 #user='nastia'
