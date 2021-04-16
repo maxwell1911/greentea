@@ -9,6 +9,7 @@
 ###########################
 #some not yet used variables#
 #user='nastia'
+## Step 1 TOR_ Step 2 TOR user_ Step 7 cron
 #router_ip='192.168.1.1'
 ###########################
 # Features should be enabled: #
@@ -54,7 +55,7 @@ ipset create unblock hash:net #main
 ### TOR. Re-resolve unblock-list sites
 /etc/storage/unblock/unblock_ipset.sh &
 ### comments.some scripts to remember
-# /etc/storage/unblock/setup_unblock_denys.sh #main script.Setup
+# /etc/storage/unblock/setup_unblock_nastia.sh #main script.Setup
 # /etc/storage/unblock/unblock_update.sh #main script.Update
 # ipset list unblock #check unblock-ipset array
 ' >> /etc/storage/start_script.sh
@@ -70,7 +71,7 @@ echo '
 ## See https://www.torproject.org/docs/tor-manual.html,
 ## for more options you can use in this file.
 #User admin
-User denys
+User nastia
 #PidFile /opt/var/run/tor.pid
 PidFile /var/run/tor.pid
 #ExcludeExitNodes {RU}, {UA}, {BY}, {KZ}, {MD}, {AZ}, {AM}, {GE}, {LY}, {LT}, {TM}, {UZ}, {EE}
