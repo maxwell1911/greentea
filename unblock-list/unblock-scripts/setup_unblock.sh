@@ -9,6 +9,7 @@
 ###########################
 #some not yet used variables#
 #user='maxwell'
+## Step 1 TOR_ Step 2 TOR user_ Step 7 cron
 #router_ip='192.168.1.1'
 ###########################
 # Features should be enabled: #
