@@ -10,6 +10,7 @@ smth useful: 1 - https://github.com/blackcofee/rublock-tor/wiki/tor_ua | 2 - htt
 3 — chmod +x /etc/storage/unblock/setup_unblock.sh
 #some not yet used variables#
 #user='maxwell'
+## Step 1 TOR_ Step 2 TOR user_ Step 7 cron
 #router_ip='192.168.1.1'
 ###########################
 # Features should be enabled: #
