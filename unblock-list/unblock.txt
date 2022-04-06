@@ -49,6 +49,9 @@ yastatic.net
 #flisland.net
 #flibusta.site
 
+### AV
+nod.kini24.ru
+
 ####################
 ### IP
 ####################
